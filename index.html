@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Investimento</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        main {
+            padding: 20px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Plataforma de Investimento</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#perfil">Perfil</a></li>
+                <li><a href="#simulador">Simulador de Investimento</a></li>
+                <li><a href="#deposito">Depósito</a></li>
+                <li><a href="#feedback">Feedback</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main id="home">
+        <section class="container mt-4">
+            <h2>Nossos Planos</h2>
+            <ul>
+                <li>Invista 500MT e obtenha um lucro de 2400MT</li>
+                <li>Invista 1500MT e obtenha um lucro de 3500MT</li>
+                <li>Invista 4000MT e obtenha um lucro de 13000MT</li>
+            </ul>
+        </section>
+        <section id="perfil" class="container mt-4">
+            <h2>Login</h2>
+            <div id="userDetails" style="display: none;">
+                <p id="userName"></p>
+                <p id="userEmail"></p>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Email:</label>
+                    <input type="email" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Entrar</button>
+                <button type="button" class="btn btn-secondary" onclick="showSignup()">Cadastrar</button>
+            </form>
+            <form id="signupForm" style="display: none;">
+                <div class="form-group">
+                    <label for="signupEmail">Email:</label>
+                    <input type="email" class="form-control" id="signupEmail" name="signupEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Senha:</label>
+                    <input type="password" class="form-control" id="signupPassword" name="signupPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Cadastrar</button>
+                <button type="button" class="btn btn-secondary" onclick="showLogin()">Voltar ao Login</button>
+            </form>
+        </section>
+        <section id="simulador" class="container mt-4">
+            <h2>Simulador de Investimento</h2>
+            <form id="simuladorForm">
+                <div class="form-group">
+                    <label for="investment">Valor do Investimento (MT):</label>
+                    <input type="number" class="form-control" id="investment" name="investment" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Calcular</button>
+            </form>
+            <p id="result" class="mt-3"></p>
+        </section>
+        <section id="deposito" class="container mt-4">
+            <h2>Enviar Número de Depósito</h2>
+            <form id="depositForm">
+                <div class="form-group">
+                    <label for="phone">Número de Telefone:</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" value="846658577" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="deposit">Número de Depósito:</label>
+                    <input type="text" class="form-control" id="deposit" name="deposit" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </form>
+            <a id="whatsappLink" href="#" class="btn btn-success mt-2">Enviar Comprovante pelo WhatsApp</a>
+        </section>
+        <section class="container mt-4">
+            <h2>Gráfico do Dólar</h2>
+            <canvas id="dollarChart"></canvas>
+        </section>
+        <section id="feedback" class="container mt-4">
+            <h2>Feedback de Clientes</h2>
+            <div id="feedbackList">
+                <!-- Feedbacks serão inseridos aqui -->
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Plataforma de Investimento</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Configuração do Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyBf5ro7jPQIoFOjvoLsxebAQi9kmR3TVY0",
+            authDomain: "mingosbot.firebaseapp.com",
+            projectId: "mingosbot",
+            storageBucket: "mingosbot.appspot.com",
+            messagingSenderId: "403370334139",
+            appId: "1:403370334139:web:eef5d2bd9ffc704d33169e"
+        };
+        // Inicializa o Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // Função para mostrar o formulário de cadastro
+        function showSignup() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+        }
+        
+        // Função para mostrar o formulário de login
+        function showLogin() {
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        }
+        
+        // Função de cadastro de usuário
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert('Conta criada com sucesso!');
+                    showLogin();
+                })
+                .catch((error) => {
+                    alert('Erro ao criar conta: ' + error.message);
+                });
+        });
+
+        // Função de login de usuário
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            firebase.auth().signInWithEmailAndPassword(username, password)
+                .then((userCredential) => {
+                    alert('Login bem-sucedido!');
+                    showUserDetails(userCredential.user);
+                })
+                .catch((error) => {
+                    alert('Erro ao fazer login: ' + error.message);
+                });
+        });
+
+        // Função para mostrar detalhes do usuário
+        function showUserDetails(user) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('userDetails').style.display = 'block';
+            document.getElementById('userName').innerText = 'Nome: ' + (user.displayName || 'Usuário');
+            document.getElementById('userEmail').innerText = 'Email: ' + user.email;
+        }
+
+        // Função de logout
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                alert('Logout bem-sucedido!');
+                document.getElementById('userDetails').style.display = 'none';
+                showLogin();
+            }).catch((error) => {
+                alert('Erro ao fazer logout: ' + error.message);
+            });
+        }
+
+        // Função para calcular o lucro
+        document.getElementById('simuladorForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const investment = parseFloat(document.getElementById('investment').value);
+            let profit;
+            
+            if (investment === 500) {
+                profit = 2400;
+            } else if (investment === 1500) {
+                profit = 3500;
+            } else if (investment === 4000) {
+                profit = 13000;
+            } else {
+                profit = "Valor de investimento inválido. Tente 500MT, 1500MT ou 4000MT.";
+            }
+            
+            document.getElementById('result').innerText = `O lucro será: ${profit}MT`;
+        });
+
+        // Função para enviar número de depósito
+        document.getElementById('depositForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const phone = document.getElementById('phone').value;
+            const deposit = document.getElementById('deposit').value;
+
+            alert(`Número de depósito ${deposit} enviado para ${phone}`);
+
+            const whatsappMessage = `Número de depósito: ${deposit}`;
+            const whatsappUrl = `https://wa.me/862035146?text=${encodeURIComponent(whatsappMessage)}`;
+            document.getElementById('whatsappLink').href = whatsappUrl;
+        });
+
+        // Função para mostrar o gráfico do dólar
+        var ctx = document.getElementById('dollarChart').getContext('2d');
+        var dollarChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Valor do Dólar',
+                    data: [3.9, 4.2, 4.1, 4.3, 4.4, 4.6, 4.7],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Função para mostrar feedback de clientes
+        const feedbacks = [
+            { name: "João Silva", message: "Investi 500MT e estou muito satisfeito com o retorno!", investment: 500 },
+            { name: "Maria Souza", message: "O lucro foi ainda maior do que eu esperava. Investimento seguro!", investment: 1500 },
+            { name: "Carlos Pereira", message: "Investi 4000MT e obtive um grande retorno. Recomendo a todos!", investment: 4000 },
+            { name: "Ana Oliveira", message: "Plataforma confiável e atendimento excelente!", investment: 1500 },
+            { name: "Lucas Costa", message: "Resultados rápidos e eficientes. Muito satisfeito!", investment: 500 },
+        ];
+
+        const feedbackList = document.getElementById('feedbackList');
+        feedbacks.forEach(feedback => {
+            const feedbackItem = document.createElement('div');
+            feedbackItem.className = 'card mt-3';
+            feedbackItem.innerHTML = `
+                <div class="card-body">
+                    <h5 class="card-title">${feedback.name}</h5>
+                    <p class="card-text">${feedback.message}</p>
+                    <p class="card-text"><small class="text-muted">Investimento: ${feedback.investment}MT</small></p>
+                </div>
+            `;
+            feedbackList.appendChild(feedbackItem);
+        });
+    </script>
+</body>
+</html>
